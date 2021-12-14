@@ -7,7 +7,6 @@
 #include <pari/pari.h>
 #include <assert.h>
 
-
 #include "ideal.h"
 #include "idiso.h"
 #include "constants.h"
@@ -20,46 +19,47 @@
 #include "mont.h"
 
 // argv[1] is the random seed; default = 1
-int main(int argc, char *argv[]){
-    pari_init(800000000, 1<<18);
-    init_precomputations();
+int main(void) {
 
-    setrand(stoi(1));
-    srand48(1);
-    if( argc > 1 ) {
-      setrand(strtoi(argv[1]));
-      srand48(atoi(argv[1]));
-    }
+	printf("Precomputing...\n");
+	pari_init(800000000, 1 << 18);
+	init_precomputations();
 
-    for (int i = 0; i < 10; i++) {
-      uintbig m;
-      randombytes(m.c, 32);
+	setrand(stoi(1));
+	srand48(1);
+	/*if (argc > 1) {
+		setrand(strtoi(argv[1]));
+		srand48(atoi(argv[1]));
+	}*/
 
-      public_key pk;
-      secret_key sk;
+	for (int i = 0; i < 1; i++) {
+		uintbig m;
+		randombytes(m.c, 32);
 
-      // printf("Key generation\n");
-      keygen(&pk, &sk);
+		public_key pk;
+		secret_key sk;
 
-      // printf("sk->I_T\n");
-      // output(sk.I_T);
-      // sk.I_T = gcopy(sk.I_T);
-      compressed_signature comp_sigma;
-      init_compressed_sig(&comp_sigma);
-      // signature Sigma;
+		printf("Key generation\n");
+		keygen(&pk, &sk);
 
+		printf("sk->I_T\n");
+		output(sk.I_T);
+		// sk.I_T = gcopy(sk.I_T);
+		compressed_signature comp_sigma;
+		init_compressed_sig(&comp_sigma);
+		// signature Sigma;
 
-      sign(&comp_sigma ,&sk, &pk, &m);
+		sign(&comp_sigma, &sk, &pk, &m);
 
-      assert(verif(&comp_sigma,&pk,&m));
+		assert(verif(&comp_sigma, &pk, &m));
 
-      randombytes(m.c, 32);
-      assert(!verif(&comp_sigma,&pk,&m));
-      free_compressed_sig(&comp_sigma);
-    }
+		randombytes(m.c, 32);
+		assert(!verif(&comp_sigma, &pk, &m));
+		free_compressed_sig(&comp_sigma);
+	}
 
-    printf("    \033[1;32mAll tests passed\033[0m\n");
-    exit(0);
+	printf("All tests passed\n");
+	exit(0);
 
-    return 0;
+	return 0;
 }
